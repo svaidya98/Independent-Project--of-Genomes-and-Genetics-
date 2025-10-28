@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 
 train_data = r'C:\\Users\\siddh\\OneDrive\\Desktop\\Py Files\\Genetics and Genomes project\\train.csv'
 test_data = r"C:\\Users\\siddh\\OneDrive\\Desktop\\Py Files\\Genetics and Genomes project\\test.csv"
@@ -31,7 +32,9 @@ def replace_null(df):
                 '-99': np.nan, 
                 '-': np.nan, 
                 'Not applicable': np.nan, 
-                'nan': np.nan})
+                'nan': np.nan}, inplace=True)
+    return df
+
 train_df = replace_null(train_df)
 test_df = replace_null(test_df)
 
@@ -105,6 +108,7 @@ column_list = ['Patient Age',
 
 train_df = train_df.dropna(subset=['Genetic Disorder', 'Disorder Subclass'])
 
+
 # def impute_values(df_1, df_2, column_list):
 #     imputer = IterativeImputer(max_iter=10, random_state=0)
 #     df_1_to_impute = df_1[column_list]
@@ -126,6 +130,34 @@ train_df[column_list] = train_df_imputed
 test_imputed_data = imputer.transform(test_df[column_list])
 test_df_imputed = pd.DataFrame(test_imputed_data, columns=column_list, index = test_df.index)
 test_df[column_list] = test_df_imputed
+
+
+train_object_columns = train_df.select_dtypes(include=['object']).columns
+test_object_columns = test_df.select_dtypes(include=['object']).columns
+
+train_df[train_object_columns] = train_df[train_object_columns].fillna('Missing')
+test_df[test_object_columns] = test_df[test_object_columns].fillna('Missing')
+
+drop_column_list = ['Patient First Name',
+                    'Family Name',
+                    'Patient ID',
+                    'Father\'s Name',
+                    'Institute Name',
+                    'Location of Institute',
+                    ]
+
+train_df = train_df.drop(drop_column_list, axis=1)
+test_df = test_df.drop(drop_column_list, axis=1)
+
+le_disorder = LabelEncoder()
+le_subclass = LabelEncoder()
+train_df['Genetic Disorder'] = le_disorder.fit_transform(train_df['Genetic Disorder'])
+train_df['Disorder Subclass'] = le_subclass.fit_transform(train_df['Disorder Subclass'])
+test_df['Genetic Disorder'] = le_disorder.transform(test_df['Genetic Disorder'])
+test_df['Disorder Subclass'] = le_subclass.transform(test_df['Disorder Subclass'])
+
+
+
 
 
 
